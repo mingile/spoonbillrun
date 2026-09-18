@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spoonbill run !!</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="style.css" />
+    <!-- AppleSDGothicNeoEB00: assets/fonts/AppleSDGothicNeoEB00.ttf ??? @font-face ?? -->
+  </head>
+  <body>
+    <div class="page-bg" aria-hidden="true"></div>
+    <div id="app" class="app">
+      <div class="map-stack">
+        <div class="map-shell">
+          <div id="map" class="map" role="application" aria-label="??"></div>
+          <button
+            type="button"
+            id="map-face-toggle"
+            class="map-face-toggle"
+            aria-pressed="false"
+            aria-label="face ???? ??"
+          >
+            face
+          </button>
+          <img
+            id="map-face-overlay"
+            class="map-face-overlay hidden"
+            src="./assets/face.png"
+            alt=""
+            aria-hidden="true"
+          />
+        </div>
+        <div id="detail" class="detail hidden">
+          <button
+            type="button"
+            id="detail-close"
+            class="detail-close"
+            aria-label="X"
+          >
+            X
+          </button>
+          <div class="detail-inner">
+            <div class="detail-photo">
+              <img id="detail-img" class="detail-img" alt="" />
+            </div>
+            <p id="detail-coords" class="detail-coords"></p>
+            <p id="detail-caption" class="detail-caption"></p>
+            <p id="detail-date" class="detail-date"></p>
+          </div>
+        </div>
+      </div>
+      <aside id="panel" class="panel" aria-label="banner">
+        <div id="error-banner" class="error-banner hidden" role="alert"></div>
+        <header class="banner-bar">
+          <h1 class="banner-bar__title">
+            <img
+              class="banner-bar__logo"
+              src="./assets/banner.png"
+              width="372"
+              height="80"
+              alt="Spoonbill Run"
+            />
+          </h1>
+        </header>
+        <div id="photo-list-scroller" class="photo-list-scroller">
+          <div class="photo-scatter-stage">
+            <ul id="photo-list" class="photo-list"></ul>
+            <div
+              id="photo-scatter-spacer"
+              class="photo-scatter-spacer"
+              aria-hidden="true"
+            ></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+    <div id="dev-coords" class="dev-coords hidden" aria-live="polite"></div>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
