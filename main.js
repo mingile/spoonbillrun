@@ -58,6 +58,16 @@ let scatterScrollRaf = 0;
 const thumbLoadQueue = [];
 let thumbLoadsInFlight = 0;
 const THUMB_LOAD_CONCURRENCY = 3;
+/** 지도 블루 마커를 버튼 후 이 시간(ms)에 걸쳐 id 순으로 하나씩 표시 */
+const MARKER_REVEAL_TOTAL_MS = 5000;
+/** x 순서상 맨 마지막에 등장 */
+const MARKER_REVEAL_LAST_IDS = new Set(['p003', 'p010', 'p017']);
+/** 두 번째로 등장하는 마커 (고정) */
+const MARKER_REVEAL_SECOND_ID = 'p009';
+
+let markersRevealStarted = false;
+/** @type {ReturnType<typeof setTimeout>[]} */
+let markerRevealTimeouts = [];
 
 const el = {
   errorBanner: document.getElementById('error-banner'),
@@ -73,6 +83,7 @@ const el = {
   detailDate: document.getElementById('detail-date'),
   mapStack: document.querySelector('.map-stack'),
   mapShell: document.querySelector('.map-shell'),
+  mapRevealMarkers: document.getElementById('map-reveal-markers'),
   mapFaceToggle: document.getElementById('map-face-toggle'),
   mapFaceOverlay: document.getElementById('map-face-overlay'),
   devCoords: document.getElementById('dev-coords'),
@@ -677,10 +688,11 @@ function selectPhoto(id, { pan = false } = {}) {
 
 function addPhotoMarkers() {
   if (!map) return;
+  markersById.clear();
   for (const photo of photos) {
     const marker = L.marker(toLatLng(photo, imageHeight), {
       icon: createMarkerIcon(),
-    }).addTo(map);
+    });
 
     marker.on('click', () => selectPhoto(photo.id, { pan: false }));
     marker.on('mouseover', () => setHoveredId(photo.id, { fromMap: true }));
@@ -690,6 +702,88 @@ function addPhotoMarkers() {
 
     markersById.set(photo.id, marker);
   }
+}
+
+function revealMapMarker(photoId) {
+  if (!map) return;
+  const marker = markersById.get(photoId);
+  if (!marker || map.hasLayer(marker)) return;
+  marker.addTo(map);
+  requestAnimationFrame(() => {
+    const dot = marker.getElement()?.querySelector('.marker-dot');
+    dot?.classList.add('marker-dot--pop-in');
+  });
+}
+
+/** p009 x부터 오른쪽으로, x가 더 작은 마커는 맨 뒤에 등장 */
+function sortPhotosForMapReveal(photosList) {
+  const anchor = photosList.find((p) => p.id === 'p019') ?? photosList[0];
+  if (!anchor) return [];
+
+  const anchorX = Number(anchor.x);
+  const span =
+    imageWidth ||
+    Math.max(0, ...photosList.map((p) => Number(p.x)).filter(Number.isFinite)) + 1;
+
+  const rankX = (x) => {
+    let delta = Number(x) - anchorX;
+    if (delta < 0) delta += span;
+    return delta;
+  };
+
+  const byXOrder = [...photosList].sort((a, b) => {
+    const byX = rankX(a.x) - rankX(b.x);
+    if (byX !== 0) return byX;
+    return a.id.localeCompare(b.id);
+  });
+
+  const main = [];
+  const last = [];
+  for (const photo of byXOrder) {
+    if (MARKER_REVEAL_LAST_IDS.has(photo.id)) last.push(photo);
+    else main.push(photo);
+  }
+  const ordered = [...main, ...last];
+  return pinSecondMapRevealMarker(ordered, MARKER_REVEAL_SECOND_ID);
+}
+
+/** x 순서는 유지하고, 지정 id를 항상 두 번째 슬롯에 둔다 */
+function pinSecondMapRevealMarker(ordered, photoId) {
+  const pinIndex = ordered.findIndex((p) => p.id === photoId);
+  if (pinIndex === -1) return ordered;
+
+  const pinned = ordered[pinIndex];
+  const rest = ordered.filter((p) => p.id !== photoId);
+  if (rest.length === 0) return [pinned];
+
+  return [rest[0], pinned, ...rest.slice(1)];
+}
+
+function startMapMarkerReveal() {
+  if (!map || markersRevealStarted) return;
+  markersRevealStarted = true;
+  el.mapRevealMarkers?.setAttribute('disabled', 'true');
+
+  const sorted = sortPhotosForMapReveal(photos);
+  const count = sorted.length;
+  if (count === 0) return;
+
+  const stepMs = MARKER_REVEAL_TOTAL_MS / count;
+  sorted.forEach((photo, index) => {
+    const timeoutId = setTimeout(() => {
+      revealMapMarker(photo.id);
+      if (index === count - 1) {
+        el.mapRevealMarkers?.classList.add('hidden');
+      }
+    }, index * stepMs);
+    markerRevealTimeouts.push(timeoutId);
+  });
+}
+
+function bindMapMarkerReveal() {
+  el.mapRevealMarkers?.addEventListener('click', () => {
+    startMapMarkerReveal();
+  });
 }
 
 function applyMapLayoutAspect(width, height) {
@@ -781,6 +875,7 @@ document.addEventListener('keydown', (e) => {
 
 applyFaceOverlayConfig();
 bindMapFaceOverlay();
+bindMapMarkerReveal();
 
 async function main() {
   if (typeof L === 'undefined') {

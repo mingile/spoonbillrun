@@ -125,6 +125,35 @@ body {
   background: rgba(255, 255, 255, var(--ui-column-alpha));
 }
 
+.map-reveal-markers {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 1100;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #0952a5;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  color: #0952a5;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.map-reveal-markers:hover:not(:disabled) {
+  background: #0952a5;
+  color: #fff;
+}
+
+.map-reveal-markers:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .map-face-toggle {
   position: absolute;
   top: 14px;
@@ -579,6 +608,21 @@ body {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   box-sizing: border-box;
   transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.marker-dot--pop-in {
+  animation: marker-dot-pop 0.35s ease-out;
+}
+
+@keyframes marker-dot-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .marker-dot--hovered {
