@@ -154,6 +154,60 @@ body {
   cursor: default;
 }
 
+body.app-phone-viewer-open {
+  overflow: hidden;
+}
+
+.app-phone-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 2500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.app-phone-viewer__backdrop {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  border: none;
+  background: rgba(12, 18, 28, 0.62);
+  cursor: pointer;
+}
+
+.app-phone-viewer__phone {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  width: min(402px, 92vw);
+  max-height: min(874px, 88vh);
+  aspect-ratio: 402 / 874;
+  border-radius: 2.75rem;
+  overflow: hidden;
+  background: #0a0a0a;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.12),
+    0 24px 64px rgba(0, 0, 0, 0.45);
+  touch-action: none;
+  cursor: grab;
+}
+
+.app-phone-viewer__phone:active {
+  cursor: grabbing;
+}
+
+.app-phone-viewer__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
 .map-face-toggle {
   position: absolute;
   top: 14px;

@@ -65,6 +65,14 @@ const MARKER_REVEAL_LAST_IDS = new Set(['p003', 'p010', 'p017']);
 /** 두 번째로 등장하는 마커 (고정) */
 const MARKER_REVEAL_SECOND_ID = 'p009';
 
+/** App 뷰어 — iPhone 17 논리 402×874pt (style.css), 스와이프로 전환 */
+const APP_PHONE_IMAGES = [
+  './assets/app/1.png',
+  './assets/app/2.png',
+  './assets/app/3.png',
+];
+const APP_PHONE_SWIPE_THRESHOLD_PX = 48;
+
 let markersRevealStarted = false;
 /** @type {ReturnType<typeof setTimeout>[]} */
 let markerRevealTimeouts = [];
@@ -84,6 +92,10 @@ const el = {
   mapStack: document.querySelector('.map-stack'),
   mapShell: document.querySelector('.map-shell'),
   mapRevealMarkers: document.getElementById('map-reveal-markers'),
+  mapAppLaunch: document.getElementById('map-app-launch'),
+  appPhoneViewer: document.getElementById('app-phone-viewer'),
+  appPhoneViewerStage: document.getElementById('app-phone-viewer-stage'),
+  appPhoneViewerImg: document.getElementById('app-phone-viewer-img'),
   mapFaceToggle: document.getElementById('map-face-toggle'),
   mapFaceOverlay: document.getElementById('map-face-overlay'),
   devCoords: document.getElementById('dev-coords'),
@@ -774,6 +786,7 @@ function startMapMarkerReveal() {
       revealMapMarker(photo.id);
       if (index === count - 1) {
         el.mapRevealMarkers?.classList.add('hidden');
+        el.mapAppLaunch?.classList.remove('hidden');
       }
     }, index * stepMs);
     markerRevealTimeouts.push(timeoutId);
@@ -783,6 +796,72 @@ function startMapMarkerReveal() {
 function bindMapMarkerReveal() {
   el.mapRevealMarkers?.addEventListener('click', () => {
     startMapMarkerReveal();
+  });
+}
+
+let appPhoneSlideIndex = 0;
+
+function setAppPhoneSlide(index) {
+  const len = APP_PHONE_IMAGES.length;
+  if (len === 0 || !el.appPhoneViewerImg) return;
+  appPhoneSlideIndex = ((index % len) + len) % len;
+  el.appPhoneViewerImg.src = APP_PHONE_IMAGES[appPhoneSlideIndex];
+}
+
+function openAppPhoneViewer() {
+  if (!el.appPhoneViewer) return;
+  appPhoneSlideIndex = 0;
+  setAppPhoneSlide(0);
+  el.appPhoneViewer.classList.remove('hidden');
+  document.body.classList.add('app-phone-viewer-open');
+}
+
+function closeAppPhoneViewer() {
+  el.appPhoneViewer?.classList.add('hidden');
+  document.body.classList.remove('app-phone-viewer-open');
+}
+
+function bindAppPhoneViewer() {
+  el.mapAppLaunch?.addEventListener('click', () => {
+    openAppPhoneViewer();
+  });
+
+  el.appPhoneViewer
+    ?.querySelector('.app-phone-viewer__backdrop')
+    ?.addEventListener('click', () => {
+      closeAppPhoneViewer();
+    });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !el.appPhoneViewer?.classList.contains('hidden')) {
+      closeAppPhoneViewer();
+    }
+  });
+
+  const stage = el.appPhoneViewerStage;
+  if (!stage) return;
+
+  let pointerId = null;
+  let startX = 0;
+
+  stage.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    stage.setPointerCapture(e.pointerId);
+  });
+
+  stage.addEventListener('pointerup', (e) => {
+    if (pointerId !== e.pointerId) return;
+    const dx = e.clientX - startX;
+    pointerId = null;
+    if (Math.abs(dx) < APP_PHONE_SWIPE_THRESHOLD_PX) return;
+    if (dx < 0) setAppPhoneSlide(appPhoneSlideIndex + 1);
+    else setAppPhoneSlide(appPhoneSlideIndex - 1);
+  });
+
+  stage.addEventListener('pointercancel', () => {
+    pointerId = null;
   });
 }
 
@@ -876,6 +955,7 @@ document.addEventListener('keydown', (e) => {
 applyFaceOverlayConfig();
 bindMapFaceOverlay();
 bindMapMarkerReveal();
+bindAppPhoneViewer();
 
 async function main() {
   if (typeof L === 'undefined') {

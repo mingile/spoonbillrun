@@ -34,6 +34,14 @@
           </button>
           <button
             type="button"
+            id="map-app-launch"
+            class="map-reveal-markers hidden"
+            aria-haspopup="dialog"
+          >
+            App
+          </button>
+          <button
+            type="button"
             id="map-face-toggle"
             class="map-face-toggle"
             aria-pressed="false"
@@ -108,6 +116,28 @@
       </aside>
     </div>
     <div id="dev-coords" class="dev-coords hidden" aria-live="polite"></div>
+    <div
+      id="app-phone-viewer"
+      class="app-phone-viewer hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label="App preview"
+    >
+      <button
+        type="button"
+        class="app-phone-viewer__backdrop"
+        aria-label="Close"
+        tabindex="-1"
+      ></button>
+      <div class="app-phone-viewer__phone" id="app-phone-viewer-stage">
+        <img
+          id="app-phone-viewer-img"
+          class="app-phone-viewer__img"
+          alt=""
+          draggable="false"
+        />
+      </div>
+    </div>
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
