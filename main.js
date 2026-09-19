@@ -7,9 +7,9 @@ const MAP_IMAGE_PATH = 'assets/map.png';
  */
 const FACE_OVERLAY = {
   opacity: 0.58,
-  widthPercent: 52,
-  topPercent: 36,
-  leftPercent: 49,
+  widthPercent: 75,
+  topPercent: 47,
+  leftPercent: 56,
   translateXPercent: -50,
   translateYPercent: -50,
 };
